@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub User Account Creation Date</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            flex: 1;
+        }
+        footer {
+            padding: 1rem 0;
+            margin-top: auto;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <header class="py-3 mb-4 border-bottom">
+        <div class="container d-flex flex-wrap justify-content-center">
+            <a href="/" class="d-flex align-items-center mb-3 mb-lg-0 me-lg-auto text-dark text-decoration-none">
+                <span class="fs-4">GitHub Account Info</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="mb-4">Fetch GitHub User Account Creation Date</h1>
+
+        <form id="github-user-unique-nonce-123" class="mb-4">
+            <div class="mb-3">
+                <label for="github-username" class="form-label">GitHub Username</label>
+                <input type="text" class="form-control" id="github-username" placeholder="e.g., octocat" required>
+            </div>
+            <!-- This hidden input can be used to pass a GitHub Personal Access Token (PAT) for higher API rate limits. -->
+            <!-- It can be pre-filled via URL parameter (e.g., ?token=YOUR_PAT_HERE) or other means. -->
+            <input type="hidden" id="github-token" value="">
+            <button type="submit" class="btn btn-primary">Get Creation Date</button>
+        </form>
+
+        <div class="card p-3">
+            <h5 class="card-title">Account Creation Date:</h5>
+            <p class="card-text" id="github-created-at">Enter a username and click "Get Creation Date" above.</p>
+        </div>
+    </main>
+
+    <footer class="footer mt-auto py-3 bg-light text-center">
+        <div class="container">
+            <span class="text-muted">
+                &copy; 2023 Academic Grading App. Licensed under the <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">MIT License</a>.
+            </span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector("#github-user-unique-nonce-123");
+            const usernameInput = document.getElementById("github-username");
+            const createdAtDisplay = document.getElementById("github-created-at");
+            const githubTokenInput = document.getElementById("github-token");
+
+            // Function to get a URL query parameter
+            const getQueryParam = (name) => {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(name);
+            };
+
+            // Check if a token is provided via URL parameter (?token=...) and pre-fill hidden input
+            const tokenFromUrl = getQueryParam('token');
+            if (tokenFromUrl) {
+                githubTokenInput.value = tokenFromUrl;
+            }
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevent default form submission
+
+                const username = usernameInput.value.trim();
+                if (!username) {
+                    createdAtDisplay.textContent = "Please enter a GitHub username.";
+                    return;
+                }
+
+                createdAtDisplay.textContent = "Fetching data...";
+
+                const apiUrl = `https://api.github.com/users/${username}`;
+                
+                // Use token from the hidden input (which might have been pre-filled from URL or other means)
+                const token = githubTokenInput.value.trim();
+
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = `token ${token}`;
+                    // console.log("Using GitHub token for API request."); // Optional: for debugging
+                }
+
+                try {
+                    const response = await fetch(apiUrl, { headers: headers });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        const createdAt = data.created_at; // e.g., "2011-01-25T18:41:40Z"
+                        if (createdAt) {
+                            // Extract YYYY-MM-DD part directly from the ISO 8601 string.
+                            // GitHub's `created_at` is inherently in UTC.
+                            const dateOnly = createdAt.substring(0, 10);
+                            createdAtDisplay.textContent = `Account created on: ${dateOnly} UTC`;
+                        } else {
+                            createdAtDisplay.textContent = "Could not find creation date for this user.";
+                        }
+                    } else {
+                        // GitHub API error messages are often in data.message
+                        createdAtDisplay.textContent = `Error: ${data.message || response.statusText}. Status: ${response.status}`;
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    createdAtDisplay.textContent = `Failed to fetch data: ${error.message}`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
