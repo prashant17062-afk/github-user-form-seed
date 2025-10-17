@@ -3,101 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub User Lookup for Academic Grading</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧑‍💻</text></svg>">
+    <title>GitHub User Lookup</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; margin: 20px; background-color: #f4f7f6; color: #333; }
-        .container { max-width: 800px; margin: 20px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        h1, h2 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
-        form { display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-end; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-        input[type="text"] { flex-grow: 1; padding: 12px 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
-        button { padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; transition: background-color 0.2s ease; }
+        body { font-family: sans-serif; line-height: 1.6; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #0056b3; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"] { width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
         button:hover { background-color: #0056b3; }
-        #github-status { margin-top: 15px; padding: 10px; border-radius: 5px; font-weight: bold; background-color: #e9ecef; border: 1px solid #dee2e6; color: #343a40; }
-        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
-        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
-        .loading { background-color: #fff3cd; border-color: #ffeeba; color: #856404; }
-        .result-section { margin-top: 30px; border-top: 1px dashed #eee; padding-top: 20px; }
-        .result-item { display: flex; align-items: center; margin-bottom: 10px; }
-        .result-item strong { min-width: 120px; color: #444; }
-        #github-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-right: 20px; border: 3px solid #007bff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-        .profile-header { display: flex; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-        .profile-info { flex-grow: 1; }
-        .profile-info h3 { margin: 0 0 5px 0; color: #007bff; font-size: 1.8rem; }
-        .profile-info p { margin: 0; color: #666; font-size: 0.95rem; }
-        .bio { margin-top: 15px; font-style: italic; color: #555; }
-        .stats { display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
-        .stat-item { background: #f8f9fa; padding: 10px 15px; border-radius: 5px; text-align: center; border: 1px solid #e9ecef; }
-        .stat-item strong { display: block; font-size: 1.2rem; color: #007bff; }
-        .stat-item span { font-size: 0.85rem; color: #6c757d; }
-        footer { margin-top: 40px; padding: 20px; text-align: center; border-top: 1px solid #eee; color: #777; font-size: 0.85rem; }
-        .field-group { flex: 1; }
+        #github-account-info { margin-top: 20px; padding: 15px; background-color: #e9ecef; border-left: 5px solid #007bff; border-radius: 4px; }
+        #github-status { margin-top: 15px; padding: 10px; border-radius: 4px; background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .status-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .hidden { display: none; }
+        footer { margin-top: 40px; text-align: center; font-size: 0.9em; color: #777; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>GitHub User Lookup</h1>
-        <p>Enter a GitHub username to retrieve their profile information. This tool assists in academic grading by providing quick access to student GitHub profiles.</p>
-
+        <h1>GitHub User Information Lookup</h1>
         <form id="github-lookup-form">
-            <div class="field-group">
-                <label for="username-input">GitHub Username:</label>
-                <input type="text" id="username-input" placeholder="e.g., octocat" required>
-            </div>
-            <button type="submit">Lookup</button>
+            <label for="github-username">GitHub Username:</label>
+            <input type="text" id="github-username" placeholder="e.g., octocat" required>
+            <button type="submit" id="lookup-button">Lookup User</button>
         </form>
 
-        <div id="github-status" aria-live="polite">Ready to lookup a user.</div>
+        <div id="github-status" aria-live="polite"></div>
 
-        <div class="result-section" id="user-details" style="display: none;">
-            <h2>User Profile</h2>
-            <div class="profile-header">
-                <img id="github-avatar" src="" alt="User Avatar" style="display: none;">
-                <div class="profile-info">
-                    <h3 id="github-username-display"></h3>
-                    <p id="github-name"></p>
-                </div>
-            </div>
-            <p class="bio"><span id="github-bio"></span></p>
-
-            <div class="stats">
-                <div class="stat-item">
-                    <strong><span id="github-followers">0</span></strong>
-                    <span>Followers</span>
-                </div>
-                <div class="stat-item">
-                    <strong><span id="github-repos">0</span></strong>
-                    <span>Public Repos</span>
-                </div>
-                <div class="stat-item">
-                    <strong><span id="github-created-at">Not available</span></strong>
-                    <span>Account Created</span>
-                </div>
-                <div class="stat-item">
-                    <strong><span id="github-account-age">0 years</span></strong>
-                    <span>Account Age</span>
-                </div>
-            </div>
+        <div id="github-account-info" class="hidden">
+            <p><strong>Creation Date:</strong> <span id="github-creation-date"></span></p>
+            <p><strong>Account Age:</strong> <span id="github-account-age"></span></p>
         </div>
     </div>
 
+    <script>
+        const GITHUB_API_URL = "https://api.github.com/users/";
+        const LOCAL_STORAGE_KEY = "github-user-unique-nonce-123";
+
+        const githubUsernameInput = document.getElementById("github-username");
+        const lookupButton = document.getElementById("lookup-button");
+        const githubStatus = document.getElementById("github-status");
+        const githubAccountInfo = document.getElementById("github-account-info");
+        const githubCreationDate = document.getElementById("github-creation-date");
+        const githubAccountAge = document.getElementById("github-account-age");
+        const githubLookupForm = document.getElementById("github-lookup-form");
+
+        /**
+         * Updates the status message displayed to the user and for screen readers.
+         * @param {string} message - The message to display.
+         * @param {boolean} isError - True if the message indicates an error.
+         */
+        function updateStatus(message, isError = false) {
+            githubStatus.textContent = message;
+            if (isError) {
+                githubStatus.classList.add("status-error");
+            } else {
+                githubStatus.classList.remove("status-error");
+            }
+        }
+
+        /**
+         * Calculates the account age in whole years and formats the creation date.
+         * @param {string} dateString - The ISO 8601 creation date string from GitHub (e.g., "2011-01-25T18:44:36Z").
+         * @returns {{formattedDate: string, years: number}} An object containing the formatted date and account age in years.
+         */
+        function calculateAccountAge(dateString) {
+            const creationDate = new Date(dateString);
+            const today = new Date();
+
+            let years = today.getFullYear() - creationDate.getFullYear();
+            const m = today.getMonth() - creationDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < creationDate.getDate())) {
+                years--;
+            }
+
+            const formattedDate = creationDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            return { formattedDate, years };
+        }
+
+        /**
+         * Displays the user's GitHub information on the page.
+         * @param {object} user - The user object from the GitHub API response.
+         */
+        function displayUserInfo(user) {
+            if (!user || !user.created_at) {
+                updateStatus("Error: User data is incomplete.", true);
+                return;
+            }
+            const { formattedDate, years } = calculateAccountAge(user.created_at);
+            githubCreationDate.textContent = formattedDate;
+            githubAccountAge.textContent = `${years} years`;
+            githubAccountInfo.classList.remove("hidden");
+        }
+
+        /**
+         * Fetches GitHub user data and updates the UI.
+         * @param {string} username - The GitHub username to look up.
+         */
+        async function fetchGitHubUser(username) {
+            if (!username) {
+                updateStatus("Please enter a GitHub username.", true);
+                githubAccountInfo.classList.add("hidden");
+                return;
+            }
+
+            updateStatus(`Lookup started for ${username}...`);
+            githubAccountInfo.classList.add("hidden"); // Hide previous results
+
+            try {
+                const response = await fetch(`${GITHUB_API_URL}${username}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Failed to fetch user data.");
+                }
+
+                displayUserInfo(data);
+                updateStatus(`Lookup successful for ${username}!`);
+                
+                // Cache successful lookup in localStorage
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
+                    username: username,
+                    created_at: data.created_at
+                }));
+
+            } catch (error) {
+                updateStatus(`Lookup failed: ${error.message}`, true);
+                console.error("GitHub API Error:", error);
+            }
+        }
+
+        /**
+         * Loads cached user data from localStorage on page load.
+         */
+        function loadFromLocalStorage() {
+            try {
+                const cachedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (cachedData) {
+                    const user = JSON.parse(cachedData);
+                    if (user && user.username && user.created_at) {
+                        githubUsernameInput.value = user.username;
+                        displayUserInfo(user);
+                        updateStatus(`Loaded data for ${user.username} from cache.`);
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading from localStorage:", error);
+                updateStatus("Failed to load cached data.", true);
+                localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear potentially corrupt data
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener("DOMContentLoaded", loadFromLocalStorage);
+
+        githubLookupForm.addEventListener("submit", (event) => {
+            event.preventDefault(); // Prevent default form submission
+            fetchGitHubUser(githubUsernameInput.value.trim());
+        });
+
+    </script>
+
     <footer>
+        <p>&copy; 2023 Expert AI Web Developer</p>
         <p>
-            This project is licensed under the MIT License.
-            <br>
-            Copyright &copy; <span id="current-year"></span> Your Name or Organization.
-            <br>
+            MIT License
+        </p>
+        <p>
             Permission is hereby granted, free of charge, to any person obtaining a copy
             of this software and associated documentation files (the "Software"), to deal
             in the Software without restriction, including without limitation the rights
             to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
             copies of the Software, and to permit persons to whom the Software is
             furnished to do so, subject to the following conditions:
-            <br>
+        </p>
+        <p>
             The above copyright notice and this permission notice shall be included in all
             copies or substantial portions of the Software.
-            <br>
+        </p>
+        <p>
             THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
             IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
             FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -107,167 +196,5 @@
             SOFTWARE.
         </p>
     </footer>
-
-    <script>
-        // Set current year for footer copyright
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-
-        const GITHUB_API_BASE_URL = "https://api.github.com/users/";
-        const LOCAL_STORAGE_KEY = "github-user-unique-nonce-123"; // Seed for caching, as per instructions
-
-        // DOM Elements
-        const form = document.getElementById("github-lookup-form");
-        const usernameInput = document.getElementById("username-input");
-        const githubStatus = document.getElementById("github-status");
-        const userDetailsSection = document.getElementById("user-details");
-        const githubUsernameDisplay = document.getElementById("github-username-display");
-        const githubName = document.getElementById("github-name");
-        const githubBio = document.getElementById("github-bio");
-        const githubFollowers = document.getElementById("github-followers");
-        const githubRepos = document.getElementById("github-repos");
-        const githubCreatedAt = document.getElementById("github-created-at");
-        const githubAccountAge = document.getElementById("github-account-age");
-        const githubAvatar = document.getElementById("github-avatar");
-
-        // Function to display status messages
-        function displayStatus(message, type = "") {
-            githubStatus.textContent = message;
-            githubStatus.className = ""; // Clear previous classes
-            if (type) {
-                githubStatus.classList.add(type);
-            }
-        }
-
-        // Function to clear user details from the UI
-        function clearUI() {
-            githubUsernameDisplay.textContent = "";
-            githubName.textContent = "";
-            githubBio.textContent = "";
-            githubFollowers.textContent = "0";
-            githubRepos.textContent = "0";
-            githubCreatedAt.textContent = "Not available";
-            githubAccountAge.textContent = "0 years";
-            githubAvatar.src = "";
-            githubAvatar.alt = "User Avatar";
-            githubAvatar.style.display = "none";
-            userDetailsSection.style.display = "none";
-        }
-
-        // Function to calculate account age in whole years
-        function calculateAccountAge(createdAtDateString) {
-            if (!createdAtDateString) {
-                return "0 years";
-            }
-            const createdDate = new Date(createdAtDateString);
-            const now = new Date();
-            let years = now.getFullYear() - createdDate.getFullYear();
-            const m = now.getMonth() - createdDate.getMonth();
-            if (m < 0 || (m === 0 && now.getDate() < createdDate.getDate())) {
-                years--;
-            }
-            return `${Math.max(0, years)} years`; // Ensure age is not negative
-        }
-
-        // Function to format date
-        function formatDate(dateString) {
-            if (!dateString) return "Not available";
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            try {
-                return new Date(dateString).toLocaleDateString(undefined, options);
-            } catch (e) {
-                console.error("Error formatting date:", e);
-                return "Invalid date";
-            }
-        }
-
-        // Function to update the UI with user data
-        function updateUI(userData) {
-            if (userData) {
-                githubUsernameDisplay.textContent = userData.login || "N/A";
-                githubName.textContent = userData.name || "N/A";
-                githubBio.textContent = userData.bio || "No public bio.";
-                githubFollowers.textContent = userData.followers || "0";
-                githubRepos.textContent = userData.public_repos || "0";
-                
-                const formattedCreatedAt = formatDate(userData.created_at);
-                githubCreatedAt.textContent = formattedCreatedAt;
-                githubAccountAge.textContent = calculateAccountAge(userData.created_at);
-
-                if (userData.avatar_url) {
-                    githubAvatar.src = userData.avatar_url;
-                    githubAvatar.alt = `${userData.login}'s avatar`;
-                    githubAvatar.style.display = "block";
-                } else {
-                    githubAvatar.src = "";
-                    githubAvatar.style.display = "none";
-                }
-                userDetailsSection.style.display = "block";
-            } else {
-                clearUI();
-            }
-        }
-
-        // Function to fetch GitHub user data
-        async function fetchGitHubUser(username) {
-            if (!username) {
-                displayStatus("Please enter a GitHub username.", "error");
-                clearUI();
-                return;
-            }
-
-            displayStatus(`Lookup started for ${username}...`, "loading");
-            clearUI(); // Clear previous results while loading
-
-            try {
-                const response = await fetch(`${GITHUB_API_BASE_URL}${username}`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    updateUI(data);
-                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-                    usernameInput.value = username; // Ensure input field retains the successfully looked up username
-                    displayStatus(`Lookup successful for ${username}.`, "success");
-                } else {
-                    displayStatus(`Lookup failed for ${username}. Error: ${data.message || 'User not found.'}`, "error");
-                    localStorage.removeItem(LOCAL_STORAGE_KEY); // Remove stale data if lookup fails for current user
-                    clearUI();
-                }
-            } catch (error) {
-                console.error("Fetch error:", error);
-                displayStatus(`Lookup failed for ${username}. Network error or API issue.`, "error");
-                localStorage.removeItem(LOCAL_STORAGE_KEY); // Remove stale data on network error
-                clearUI();
-            }
-        }
-
-        // Function to load cached data from localStorage
-        function loadCachedData() {
-            const cachedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (cachedData) {
-                try {
-                    const userData = JSON.parse(cachedData);
-                    usernameInput.value = userData.login || "";
-                    updateUI(userData);
-                    displayStatus(`Loaded cached data for ${userData.login}.`, "success");
-                } catch (e) {
-                    console.error("Error parsing cached data:", e);
-                    localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear corrupted data
-                    displayStatus("Error loading cached data. Please try a new lookup.", "error");
-                }
-            } else {
-                displayStatus("No cached data found. Ready to lookup a user.");
-            }
-        }
-
-        // Event Listeners
-        form.addEventListener("submit", (event) => {
-            event.preventDefault();
-            const username = usernameInput.value.trim();
-            fetchGitHubUser(username);
-        });
-
-        // Load cached data on page load
-        document.addEventListener("DOMContentLoaded", loadCachedData);
-    </script>
 </body>
 </html>
